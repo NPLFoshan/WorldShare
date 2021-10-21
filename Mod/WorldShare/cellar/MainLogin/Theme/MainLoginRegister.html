@@ -142,27 +142,71 @@
                         local password = page:GetValue('register_account_password') or ''
 
                         if not Validated:Account(account) then
-                            page:SetUIValue('register_account_field_error_msg', L'*账号需4位以上且非数字开头的字母、数字组合形式')
-                            page:FindControl('register_account_field_error').visible = true
-                            return false
+                            local content = [[
+                                <div style='padding: 15px;
+                                            padding-top: 25px;
+                                            font-size: 16px;
+                                            base-font-size: 16px;'>
+                                    <div><%%= L'1.账号需要大于3的字母或字母+数字组合；' %%></div>
+                                    <div><%%= L'2.必须以字母开头的；' %%></div>
+                                    <div>
+                                        <%%= L'*推荐使用名' %%>
+                                        <span style='color: #FF0000;'>字拼音+出生年份，例如：</span>
+                                    </div>
+                                    <div style='color: #FF0000;'>
+                                        zhangsan2010
+                                    </div>
+                                </div>
+                            ]]
+
+                            local script = [[
+                                local page = document.GetPageCtrl()
+
+                                function close()
+                                    page:CloseWindow()
+                                end
+                            ]]
+
+                            Mod.WorldShare.MsgBox:ShowNotice(content, nil, nil, 1, 350, 200)
+
+                            return
+                        end
+
+                        if not Validated:CheckSensitive(account) then
+                            local content = [[
+                                <div style='padding: 15px;
+                                            padding-top: 25px;
+                                            font-size: 16px;
+                                            base-font-size: 16px;'>
+                                    <div><%%= L'1.账号需要大于3的字母或字母+数字组合；' %%></div>
+                                    <div><%%= L'2.必须以字母开头的；' %%></div>
+                                    <div>
+                                        <%%= L'*推荐使用名' %%>
+                                        <span style='color: #FF0000;'>字拼音+出生年份，例如：</span>
+                                    </div>
+                                    <div style='color: #FF0000;'>
+                                        zhangsan2010
+                                    </div>
+                                </div>
+                            ]]
                         end
 
                         if MainLogin.accountExist then
                             page:SetUIValue('register_account_field_error_msg', L'*账号已存在，请使用其他账号')
                             page:FindControl('register_account_field_error').visible = true
-                            return false
+                            return
                         end
 
                         if not account_agree then
                             page:SetUIValue('agree_field_error_msg', L'*您未同意用户协议')
                             page:FindControl('agree_field_error').visible = true
-                            return false
+                            return
                         end
 
                         if not Validated:Password(password) then
                             page:SetUIValue('register_account_password_field_error_msg', L'*密码不合法')
                             page:FindControl('register_account_password_field_error').visible = true
-                            return false
+                            return
                         end
 
                         MainLogin.account = account
@@ -359,22 +403,6 @@
                         end
 
                         local username = page:GetValue('register_account')
-
-                        if #username < 4 then
-                            page:SetUIValue('register_account_field_error_msg', L'请输入4位以上的英文字母、数字')
-                            _guihelper.SetFontColor(page:FindControl('register_account_field_error_msg'), '#00FF00')
-                            page:FindControl('register_account_field_error').visible = true
-                            callback(false)
-                            return
-                        else
-                            if not Validated:Account(username) then
-                                page:SetUIValue('register_account_field_error_msg', L'*账号需大于3位且非数字开头的字母、数字组合形式')
-                                _guihelper.SetFontColor(page:FindControl('register_account_field_error_msg'), '#FF0000')
-                                page:FindControl('register_account_field_error').visible = true
-                                callback(false)
-                                return
-                            end
-                        end
 
                         KeepworkServiceSession:CheckUsernameExist(username, function(bIsExist)
                             if bIsExist then
